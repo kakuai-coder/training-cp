@@ -1,6 +1,6 @@
 /*
 	Author: kakuai
-	created: 2025.06.19 19:35:22
+	created: 2025.06.22 10:08:42
 */
 #include <bits/stdc++.h>
 
@@ -15,18 +15,29 @@ template <typename T>  bool minimize(T &a, const T &b) { return a > b ? a = b, t
 #endif
 //_____________________________________________________________________________________________
 
+const int maxN = 1e5 + 5; 
+
+int n; 
+vector<pair<int, int> > adj[maxN];
+int a[maxN];
+
+void dfs(int u, int par) {
+	
+}
+
+void dfs1(int u, int par) {
+	
+}
+
 void kakuai() {
-	cin >> n; 
-	for (int i = 1; i <= n; ++i) {
-		
-	}
+	
 }
 
 //_____________________________________________________________________________________________
 int32_t main() {
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
-	#define cherry "d13d2set"
+	#define cherry ""
 	if (fopen(cherry".inp", "r")) {
 		freopen(cherry".inp", "r", stdin);
 		freopen(cherry".out", "w", stdout);
