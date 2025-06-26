@@ -1,3 +1,7 @@
+/*
+    Author : kmv a.k.a kzhi
+    K41 IT CHV
+*/
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -23,7 +27,7 @@ using namespace std;
 #define se second
 
 #define openfile(TASK) if (fopen(TASK".inp","r"))\
-        {freopen(TASK".inp","r",stdin);freopen(TASK".ans","w",stdout);}
+        {freopen(TASK".inp","r",stdin);freopen(TASK".out","w",stdout);}
 #define endl '\n'
 #define Faster ios_base::sync_with_stdio(false); \
                         cin.tie(0);  cout.tie(0);
