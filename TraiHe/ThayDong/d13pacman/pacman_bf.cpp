@@ -1,89 +1,108 @@
 #include <bits/stdc++.h>
-
 using namespace std;
+const int BLOCK = 2154;
+int n, q;
+long long res;
+string s;
+int dp[100005], cnt[200005], par[100005];
+long long ans[100005];
+unordered_map <int, int> p;
+int RMQ[100005][17];
 
-#define int long long
-#define FOR(i, a, b) for(int i = a; i <= b; i ++)
-#define FORD(i, b, a) for(int i = b; i >= a; i --)
-#define MASK(o) (1ll << (o))
-#define __builtin_popcount __builtin_popcountll
-#define C_BIT(mask) __builtin_popcount(mask)
-#define BIT(mask, i) ((mask) & (1ll << (i)))
-#define ONBIT(mask, i) ((mask) | (1ll << (i)))
-#define ii pair<int, int>
-#define fi first
-#define se second
-#define pb push_back
+int get(int l, int r) {
+    int k = 31 - __builtin_clz(r - l + 1);
+    return min(RMQ[l][k], RMQ[r - (1 << k) + 1][k]);
+}
 
-const int maxN = 29;
+struct ZATA {
+    int l, r, id;
+} ques[100005];
 
-int n, m;
-int bac[maxN];
-int add = 0;
-int c[maxN][maxN];
-const int oo = 1e10 + 8;
-int odd[maxN];
-int C = 0;
-vector<ii> Edge[maxN];
+bool cmp(ZATA A, ZATA B) {
+    if (A.l / BLOCK != B.l / BLOCK) return A.l < B.l;
+    else return A.r < B.r;
+}
 
-int dp[MASK(22) + 4];
+int FIND(int u) {
+    return par[u] == u ? u : par[u] = FIND(par[u]);
+}
 
-signed main() {
-    ios_base::sync_with_stdio(false); cin.tie(0);
+void MERGE(int u, int v) {
+    u = FIND(u);
+    v = FIND(v);
+    if (u == v) return;
+    if (u > v) swap(u, v);
+    par[v] = u;
+}
 
-    cin >> n >> m;
+void ADD(int pos) {
+    res -= 1LL * cnt[dp[pos]] * (cnt[dp[pos]] - 1) / 2;
+    cnt[dp[pos]]++;
+    res += 1LL * cnt[dp[pos]] * (cnt[dp[pos]] - 1) / 2;
+}
 
-    FOR(i, 1, n)
-        FOR(j, 1, n)
-            c[i][j] = oo;
+void REMOVE(int pos) {
+    res -= 1LL * cnt[dp[pos]] * (cnt[dp[pos]] - 1) / 2;
+    cnt[dp[pos]]--;
+    res += 1LL * cnt[dp[pos]] * (cnt[dp[pos]] - 1) / 2;
+}
 
-    FOR(i, 1, n)
-        c[i][i] = 0;
-
-    add = 0;
-    FOR(i, 1, m) {
-        int u, v, w;
-        cin >> u >> v >> w;
-        bac[u] ++;
-        bac[v] ++;
-        Edge[u].pb({w, v});
-        Edge[v].pb({w, u});
-        add += w;
+main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);cout.tie(0);
+    cin >> s;
+    cin >> q;
+    for (int i = 1; i <= q; i++) {
+        cin >> ques[i].l >> ques[i].r;
+        ques[i].r++;
+        ques[i].id = i;
     }
 
-    FOR(i, 1, n)
-        for(auto x: Edge[i]) {
-            c[i][x.se] = c[x.se][i] = min(c[i][x.se], x.fi);
+    n = s.size();
+    s = " " + s;
+    for (int i = 1; i <= n; i++) {
+        dp[i + 1] = dp[i];
+        if (s[i] == '(') dp[i + 1]++;
+        else dp[i + 1]--;
+        RMQ[i + 1][0] = dp[i + 1];
+    }
+    for (int i = 1; i <= n + 1; i++) par[i] = i;
+    for (int k = 1; k <= 16; k++)
+    for (int i = 1; i + (1 << k) - 1 <= n + 1; i++)
+        RMQ[i][k] = min(RMQ[i][k - 1], RMQ[i + (1 << (k - 1))][k - 1]);
+    for (int i = 1; i <= n + 1; i++) {
+        int pos = p[dp[i]];
+        if (pos) {
+            if (get(pos, i) >= dp[i])
+                MERGE(pos, i);
         }
-
-    FOR(k, 1, n)
-        FOR(i, 1, n)
-            FOR(j, 1, n)
-                c[i][j] = min(c[i][j], c[i][k] + c[k][j]);
-
-    FOR(i, 1, n) {
-        if (c[1][i] == oo && bac[i] > 0) {
-            cout << -1;
-            return 0;
+        p[dp[i]] = i;
+        dp[i] = FIND(i);
+    }
+    sort(ques + 1, ques + q + 1, cmp);
+    int l = 1;
+    int r = 0;
+    for (int i = 1; i <= q; i++) {
+        while (ques[i].r > r) {
+            r++;
+            ADD(r);
         }
-        if (bac[i] % 2)
-            odd[++C] = i;
+        while (ques[i].l < l) {
+            l--;
+            ADD(l);
+        }
+        while (ques[i].l > l) {
+					l++;
+					REMOVE(l);
+        }
+        while (ques[i].r < r) {
+            r--;
+            REMOVE(r);
+        }
+        ans[ques[i].id] = res;
     }
 
-    FOR(i, 0, MASK(C) - 1)
-        dp[i] = oo;
-
-    dp[MASK(C) - 1] = 0;
-
-    FORD(mask, MASK(C) - 1, 1) {
-        FOR(p, 0, C - 2) FOR(i, p + 1, C - 1)
-            if (BIT(mask, i) && BIT(mask, p) && i != p) {
-                int m = MASK(i) + MASK(p);
-                dp[mask - m] = min(dp[mask - m], dp[mask] + c[odd[i + 1]][odd[p + 1]]);
-            }
-    }
-
-    cout << dp[0] + add;
+    for (int i = 1; i <= q; i++) cout << ans[i] << '\n';
 
     return 0;
 }
