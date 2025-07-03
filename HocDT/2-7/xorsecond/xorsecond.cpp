@@ -1,14 +1,8 @@
 /*
-	Author: tinhnopro
-	created: 2025.06.14 11:55:42
+	Author: kakuai
+	created: 2025.07.02 14:27:42
 */
 #include <bits/stdc++.h>
-
-#ifdef LOCAL
-#include "debug.h"
-#else
-#define debug(...) 10
-#endif // LOCAL
 
 using namespace std;
 
@@ -21,46 +15,46 @@ template <typename T>  bool minimize(T &a, const T &b) { return a > b ? a = b, t
 #endif
 //_____________________________________________________________________________________________
 
-struct edge_t {
-	int u, v, w; 
+const int maxN = 1e5 + 5; 
+int n, a[maxN]; 
 
-	edge_t(int _u, int _v, int _w) : u(_u), v(_v), w(_w) {}
-
-	bool operator < (const edge_t &other) const {
-		return w < other.w; 
-	}
-};
-
-int n, k, m, p; 
-vector<edge_t> edges;
- 
-void tinhnop() {
-	cin >> n >> k >> m >> p; 
-
-	for (int i = 1; i <= k; ++i) {
-		int u, v, d; 
-		cin >> u >> v >> d; 
-
-		edges.push_back({u, v, d});
+void kakuai() {
+	cin >> n; 
+	for (int i = 1; i <= n; ++i) {
+		cin >> a[i];
 	}
 
-	sort(edges.begin(), edges.end());
+	int res = 0; 
 
-	
+	for (int i = 1; i <= n; ++i) {
+		int mx = a[i], mx2 = a[i + 1]; 
+		maximize(res, mx ^ mx2); 
+		for (int j = i + 2; j <= n; ++j) {
+			int tmp = mx; 
+			maximize(mx, a[i]);
+			if (mx == a[i]) {
+				mx2 = tmp; 
+			} else maximize(mx2, a[i]);
+
+			maximize(res, mx ^ mx2);
+		}
+	}
+
+	cout << res; 
 }
 
 //_____________________________________________________________________________________________
 int32_t main() {
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
-	#define cherry "a1"
+	#define cherry "xorsecond"
 	if (fopen(cherry".inp", "r")) {
 		freopen(cherry".inp", "r", stdin);
 		freopen(cherry".out", "w", stdout);
 	}
 
 	// int Ntest; cin >> Ntest; while (Ntest--)
-	tinhnop();
+	kakuai();
 
 	cerr <<"\n[runtime] " << (1.0 * clock() / CLOCKS_PER_SEC) << "s.";
 	return 0;
