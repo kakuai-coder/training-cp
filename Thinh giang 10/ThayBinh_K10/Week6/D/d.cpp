@@ -1,0 +1,77 @@
+/*
+	Author: kakuai
+	created: 2025.07.03 14:14:40
+*/
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using i64 = long long;
+
+#define int long long 
+
+template <typename T>  bool maximize(T &a, const T &b) { return a < b ? a = b, true : false; }
+template <typename T>  bool minimize(T &a, const T &b) { return a > b ? a = b, true : false; }
+#if __cplusplus < 202002L
+	template <class T> int ssize(const T &a) { return a.size(); }
+#endif
+//_____________________________________________________________________________________________
+
+const int MaxN = 2e5 + 5; 
+
+int n, q, a[MaxN], bit[MaxN];
+
+void update(int id, int val) {
+	for (; id; id -= id & -id) bit[id] = max(bit[id], val);
+}
+
+int query(int x) {
+	int res = -1e18; 
+	for (; x <= n; x += x & -x) res = max(res, bit[x]);
+
+	return res; 
+}
+
+void kakuai() {
+	cin >> n; 
+	for (int i = 1; i <= n; ++i) cin >> a[i]; 
+
+	memset(bit, -0x3f, sizeof(bit));
+
+	for (int i = 1; i <= n; ++i) update(i, a[i]);
+
+	cin >> q; 
+
+	while (q--) {
+		int op; 
+		cin >> op;
+
+		if (op == 1) {
+			int u, d; 
+			cin >> u >> d;  
+			update(u, d + a[u]);
+			a[u] = d + a[u];
+		} else {
+			int k; 
+			cin >> k; 
+			cout << query(k) << '\n';
+		}
+	}
+}
+
+//_____________________________________________________________________________________________
+int32_t main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	#define cherry "d"
+	if (fopen(cherry".inp", "r")) {
+		freopen(cherry".inp", "r", stdin);
+		freopen(cherry".out", "w", stdout);
+	}
+
+	// int Ntest; cin >> Ntest; while (Ntest--)
+	kakuai();
+
+	cerr <<"\n[runtime] " << (1.0 * clock() / CLOCKS_PER_SEC) << "s.";
+	return 0;
+}
