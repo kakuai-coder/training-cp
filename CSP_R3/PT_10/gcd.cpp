@@ -1,6 +1,6 @@
 /*
 Author: kakuai
-created: 2025.07.12
+created: 2025.07.19
 */
 #include <bits/stdc++.h>
 
@@ -38,56 +38,80 @@ struct Vec<T, 1> : public vector<T> {
 };
 }  // namespace std
 
-constexpr int maxN = 5009 + 5;
+const int maxN = 2e5 + 5; 
+const int Log = 20; 
 
-int n;
-int64_t dp[maxN];
-pair<int, int> a[maxN]; 
+int n, q; 
+int a[maxN];
+
+namespace subtask12 {
+
+	int st[Log + 1][maxN];
+
+	int Get(int l, int r) {
+		int k = __lg(r - l + 1); 
+		return __gcd(st[k][l], st[k][r - (1 << k) + 1]);
+	}
+
+	void solve(void) {
+
+		for (int i = 1; i <= n; ++i) {
+			st[0][i] = a[i];
+		}
+
+		for (int j = 1; j <= Log; ++j) {
+			for (int i = 1; i + (1 << j) - 1 <= n; ++i) {
+				st[j][i] = __gcd(st[j - 1][i], st[j - 1][i + (1 << (j - 1))]);
+			}
+		}
+
+		while (q--) {
+			int l, r, x; 
+			cin >> l >> r >> x;
+			long long ans = 0;  
+			for (int u = l; u <= r; ++u) {
+				int lo = u - 1, hi = r + 1; 
+
+				while (hi - lo > 1) {
+					int mid = (lo + hi) / 2;
+
+					if (Get(u, mid) >= x) {
+						lo = mid; 
+					} else hi = mid; 
+				}
+				// cerr << u << ' ' << lo << '\n';
+
+				int d = lo - u + 1; 
+				ans += d;
+			}
+
+			cout << ans << '\n';
+		}
+	}
+};
 
 void kakuai(void) {
 	// voi26 = winner
-	cin >> n; 
+	cin >> n >> q; 
 	
 	for (int i = 1; i <= n; ++i) {
-		cin >> a[i].first;
+		cin >> a[i];
 	}
 
-	for (int i = 1; i <= n; ++i) {
-		cin >> a[i].second;
-	}
-
-	sort(a + 1, a + n + 1, [&] (const auto &a, const auto &b) {
-		return a.second > b.second;
-	});
-
-	for (int i = 1; i <= n; ++i) dp[i] = (int64_t) -1e18;
-
-	for (int i = 1; i <= n; ++i) {
-		int ai = a[i].first;
-		int bi = a[i].second;
-
-		for (int k = i; k >= 1; --k) {
-			maximize(dp[k], dp[k - 1] + ai + 1LL * bi * (k - 1));
-		}
-	}
-
-	for (int i = 1; i <= n; ++i) {
-		cout << dp[i] << " ";
-	}
-
-	cout << "\n";
+	subtask12::solve();
+	
 }
 
 int32_t main(void) {
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
-#define cherry "e"
+#define cherry "gcd"
 	if (fopen(cherry ".inp", "r")) {
 		freopen(cherry ".inp", "r", stdin);
 		freopen(cherry ".out", "w", stdout);
 	}
 
-	int Ntest; cin >> Ntest; while (Ntest--)
+	// int Ntest; cin >> Ntest; while (Ntest--)
 	kakuai();
 
 	return 0;

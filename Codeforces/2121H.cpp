@@ -38,50 +38,41 @@ struct Vec<T, 1> : public vector<T> {
 };
 }  // namespace std
 
-constexpr int maxN = 5009 + 5;
-
-int n;
-int64_t dp[maxN];
-pair<int, int> a[maxN]; 
 
 void kakuai(void) {
 	// voi26 = winner
-	cin >> n; 
+	int n;
+	cin >> n;
 	
-	for (int i = 1; i <= n; ++i) {
-		cin >> a[i].first;
-	}
+	vector<pair<int, int> > segs;
 
 	for (int i = 1; i <= n; ++i) {
-		cin >> a[i].second;
-	}
+		int l, r; 
+		cin >> l >> r;
+		segs.emplace_back(l, r);
+	}		
 
-	sort(a + 1, a + n + 1, [&] (const auto &a, const auto &b) {
-		return a.second > b.second;
-	});
+	multiset<int> S; 
+	
+	for (auto &x : segs) {
+		int l = x.first, r = x.second;
 
-	for (int i = 1; i <= n; ++i) dp[i] = (int64_t) -1e18;
-
-	for (int i = 1; i <= n; ++i) {
-		int ai = a[i].first;
-		int bi = a[i].second;
-
-		for (int k = i; k >= 1; --k) {
-			maximize(dp[k], dp[k - 1] + ai + 1LL * bi * (k - 1));
+		auto it = S.upper_bound(r);
+		if (it != S.end()) {
+			S.erase(it);
 		}
+
+		S.insert(l); 
+		cout << size32(S) << ' ';
 	}
 
-	for (int i = 1; i <= n; ++i) {
-		cout << dp[i] << " ";
-	}
-
-	cout << "\n";
+	cout << '\n';
 }
 
 int32_t main(void) {
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
-#define cherry "e"
+#define cherry "2121H"
 	if (fopen(cherry ".inp", "r")) {
 		freopen(cherry ".inp", "r", stdin);
 		freopen(cherry ".out", "w", stdout);

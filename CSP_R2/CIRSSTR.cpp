@@ -1,112 +1,173 @@
 /*
-	Author: kakuai
-	created: 2025.07.12 08:06:02
+Author: kakuai
+created: 2025.07.22
 */
 #include <bits/stdc++.h>
 
 using namespace std;
 
-using i64 = long long;
+namespace std {
 
-template <typename T>  bool maximize(T &a, const T &b) { return a < b ? a = b, true : false; }
-template <typename T>  bool minimize(T &a, const T &b) { return a > b ? a = b, true : false; }
-#if __cplusplus < 202002L
-	template <class T> int ssize(const T &a) { return a.size(); }
-#endif
-//_____________________________________________________________________________________________
+template <typename T>
+using pqmin = priority_queue<T, vector<T>, greater<T>>;
 
-const i64 Base = 31, Mod = 1e9 + 7; 
-const int maxN = 1e5 + 5; 
+template <typename T>
+bool maximize(T &a, const T &b) {
+	return a < b ? a = b, true : false;
+}
+template <typename T>
+bool minimize(T &a, const T &b) {
+	return a > b ? a = b, true : false;
+}
 
-string s1, s2; 
+template <typename T>
+int size32(const T &a) {
+	return (int)a.size();
+}
 
-struct Hash {
-	
-	int n; 
-	i64 h[maxN], Pow[maxN];
+template <typename T, int D>
+struct Vec : public vector<Vec<T, D - 1>> {
+	static_assert(D >= 1, "Error");
+	template <typename... Args>
+	Vec(int n = 0, Args... args)
+		: vector<Vec<T, D - 1>>(n, Vec<T, D - 1>(args...)) {}
+};
+template <typename T>
+struct Vec<T, 1> : public vector<T> {
+	Vec(int n = 0, const T &val = T()) : vector<T>(n, val) {}
+};
+}  // namespace std
 
-	void init(string &s) {
-		n = ssize(s); 
-		s = " " + s;
+constexpr int64_t Base = 311, NMod = 2; 
+constexpr int64_t Mod[NMod] = {(int64_t)1e9 + 7, (int64_t)1e9 + 2277};
 
-		Pow[0] = 1; 
+struct valHash {
+	int64_t val[NMod];
 
-		for (int i = 1; i <= n; ++i) {
-			Pow[i] = Pow[i - 1] * Base % Mod; 
-			h[i] = (h[i - 1] * Base % Mod + (s[i] - 'a' + 1)) % Mod; 
+	valHash(int64_t x = 0) { 
+		for (int i = 0; i < NMod; ++i) val[i] = x; 
+	}
+
+	int64_t& operator[](int i) { return val[i]; }
+	const int64_t& operator[](int i) const { return val[i]; }
+
+	bool operator==(const valHash& other) const {
+		for (int i = 0; i < NMod; ++i)
+			if (val[i] != other.val[i]) return false;
+		return true;
+	}
+
+	uint64_t to_uint64() {
+		return (uint64_t(val[0]) << 32) | uint64_t(val[1]);
+	}
+
+	valHash concat(const valHash& b, int len, const vector<valHash>& pow) const {
+		valHash ret;
+		for (int j = 0; j < NMod; ++j) {
+			ret[j] = (val[j] * pow[len][j] % Mod[j] + b[j]) % Mod[j];
+		}
+		return ret;
+	}
+};
+
+struct PolyHash {
+	vector<valHash> pow, pref;
+	int sz;
+
+	PolyHash() : sz(0) {}
+
+	PolyHash(const string &s) {
+		sz = size32(s);
+		pow.assign(sz + 1, valHash(1));
+		pref.assign(sz + 1, valHash());
+
+		for (int i = 1; i <= sz; ++i) {
+			for (int j = 0; j < NMod; ++j) {
+				pow[i][j] = pow[i - 1][j] * Base % Mod[j];
+				pref[i][j] = (pref[i - 1][j] * Base % Mod[j] + s[i - 1] - 'a' + 1) % Mod[j];
+			}
 		}
 	}
 
-	i64 Get(int l, int r) {
-		return (h[r] - h[l - 1] * Pow[r - l + 1] % Mod + Mod * Mod) % Mod;
+	valHash get(int pos, int len) const {
+		static valHash ret;
+		for (int j = 0; j < NMod; ++j) {
+			ret[j] = (pref[pos + len - 1][j] - pref[pos - 1][j] * pow[len][j] % Mod[j] + Mod[j] * Mod[j]) % Mod[j];
+		}
+		return ret;
 	}
-} hash1, hash2;
 
-set<i64> S;
+	valHash get_range(int l, int r) const {
+		return get(l, r - l + 1);
+	}
+};
 
+
+PolyHash hashs1, hashs2;
+string s1, s2;
+
+unordered_set<uint64_t> S;
+ 
 bool check(int len) {
-	S.clear(); 
-
-	for (int i = 1; i <= hash1.n; ++i) {
-		if (i + len - 1 <= hash1.n) {
-			S.insert(hash1.Get(i, i + len - 1));
+	S.clear();
+		
+	for (int i = 1; i <= hashs1.sz; ++i) {
+		if (i + len - 1 <= hashs1.sz) {
+			S.insert(hashs1.get(i, len).to_uint64());
 		} else {
-			i64 d = hash1.Get(i, hash1.n); 
-			int rem = len - (hash1.n - i + 1); 
-			d = (d * hash1.Pow[rem] % Mod + hash1.Get(1, rem)) % Mod;
-			
-			S.insert(d);
+			int rem = len - (hashs1.sz - i + 1);
+			valHash a = hashs1.get_range(i, hashs1.sz);
+			valHash b = hashs1.get_range(1, rem);
+			valHash c = a.concat(b, rem, hashs1.pow);
+			S.insert(c.to_uint64());
 		}
 	}
 
-	for (int i = 1; i <= hash2.n; ++i) {
-		if (i + len - 1 <= hash2.n) {
-			
-			if (S.count(hash2.Get(i, i + len - 1))) return true; 
-
+	for (int i = 1; i <= hashs2.sz; ++i) {
+		if (i + len - 1 <= hashs2.sz) {
+			if (S.count(hashs2.get(i, len).to_uint64())) return true;
 		} else {
-			i64 d = hash2.Get(i, hash2.n); 
-			int rem = len - (hash2.n - i + 1); 
-			d = (d * hash2.Pow[rem] % Mod + hash2.Get(1, rem)) % Mod;
+			int rem = len - (hashs2.sz - i + 1);
 			
-			if (S.count(d)) return true; 
+			valHash a = hashs2.get_range(i, hashs2.sz);
+			valHash b = hashs2.get_range(1, rem);
+			valHash c = a.concat(b, rem, hashs2.pow);
+
+			if (S.count(c.to_uint64())) return true;
 		}
 	}
 
-	return false; 
+ 
+	return false;
 }
 
-void kakuai() {
-	cin >> s1 >> s2; 
+void kakuai(void) {
+	// voi26 = winner
+	cin >> s1 >> s2;
 
-
-	hash1.init(s1); 
-	hash2.init(s2); 
-
-	int lo = 1, hi = min(hash1.n, hash2.n); 
+	hashs1 = PolyHash(s1); 
+	hashs2 = PolyHash(s2);
+ 
+	int lo = 0, hi = min(hashs1.sz, hashs2.sz) + 1;
 	while (hi - lo > 1) {
-		int mid = (hi + lo) / 2; 
-
-		if (check(mid)) lo = mid; 
-		else hi = mid; 
+		int mid = (lo + hi) >> 1;
+		if (check(mid)) lo = mid;
+		else hi = mid;
 	}
-
-	cout << lo;
+	cout << lo;	
 }
 
-//_____________________________________________________________________________________________
-int32_t main() {
+int32_t main(void) {
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
-	#define cherry "CIRSSTR"
-	if (fopen(cherry".inp", "r")) {
-		freopen(cherry".inp", "r", stdin);
-		freopen(cherry".out", "w", stdout);
+#define cherry "CIRSTR"
+	if (fopen(cherry ".inp", "r")) {
+		freopen(cherry ".inp", "r", stdin);
+		freopen(cherry ".out", "w", stdout);
 	}
 
 	// int Ntest; cin >> Ntest; while (Ntest--)
 	kakuai();
 
-	cerr <<"\n[runtime] " << (1.0 * clock() / CLOCKS_PER_SEC) << "s.";
 	return 0;
 }

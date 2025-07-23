@@ -38,23 +38,23 @@ struct Vec<T, 1> : public vector<T> {
 };
 }  // namespace std
 
-const int maxN = 1e6 + 5, Log = 20; 
+const int maxN = 2e5 + 5, Log = 20; 
 
 int n, m, q, a[maxN], b[maxN], nxtpos[maxN], nxt[maxN], pos[maxN];
 int jump[Log + 1][maxN], min_jump[Log + 1][maxN];
 
 void kakuai(void) {
 	// voi26 = winner
-	cin >> m >> n >> q;
-
-	for (int i = 1; i <= m; ++i) {
-		cin >> b[i];
-	}
+	cin >> n >> m >> q; 
 
 	for (int i = 1; i <= n; ++i) {
 		cin >> a[i]; 
 	}
 
+	for (int i = 1; i <= m; ++i) {
+		cin >> b[i];
+	}
+	
 	for (int i = 1; i < n; ++i) {
 		nxtpos[a[i]] = a[i + 1];
 	}
@@ -101,7 +101,7 @@ void kakuai(void) {
 		cin >> l >> r; 
 
 		if (r - l + 1 < n) {
-			cout << "NO\n"; 
+			cout << 0; 
 			continue;
 		}
 
@@ -113,7 +113,7 @@ void kakuai(void) {
 
 		// cerr << cur << '\n';
 
-		cout << (cur <= r ? "YES" : "NO") << "\n";
+		cout << (cur <= r);
 	}
 	
 }
