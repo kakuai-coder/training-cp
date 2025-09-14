@@ -1,0 +1,1 @@
+{"name":"Local: SPYMOVE","url":"d:\\Code\\CP\\Code THPT\\kakuai_training\\CSP_R1\\SPYMOVE.cpp","tests":[{"id":1753344888712,"input":"6 5\n4 8 2 6 9 3\n2 6 3\n3 5 3\n2 6 4\n1 5 2\n1 6 1\n","output":"7\n3\n3\n12\n21\n"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"d:\\Code\\CP\\Code THPT\\kakuai_training\\CSP_R1\\SPYMOVE.cpp","group":"local","local":true}
